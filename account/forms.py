@@ -18,6 +18,13 @@ class UserRegistrationForm(forms.ModelForm):
         model = User
         fields = ['username', 'first_name', 'email']
 
+    def clean_email(self):
+        cd = self.cleaned_data['email']
+        qs = User.objects.filter(email=cd)
+        if qs.exists():
+            return forms.ValidationError('Email already in use')
+        return cd
+
     def clean_password2(self):
         cd = self.cleaned_data
         if cd['password'] != cd['password2']:
@@ -29,6 +36,13 @@ class UserEditForm(forms.ModelForm):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'email']
+
+    def clean_email(self):
+        cd = self.cleaned_data['email']
+        qs = User.objects.exclude(id=self.instance.id).filter(email=cd)
+        if qs.exists():
+            return forms.ValidationError('Email already in use')
+        return cd
 
 
 class ProfileEditForm(forms.ModelForm):
